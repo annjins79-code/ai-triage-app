@@ -1,113 +1,105 @@
 import streamlit as st
 
-# Page setup
-st.set_page_config(page_title="AI Clinical Decision Support", layout="wide")
+st.set_page_config(page_title="AI Clinical Dashboard", layout="wide")
 
-# Title
-st.title("🫀 AI Clinical Decision Support System")
-st.caption("Cardiac Triage, Test Recommendation & Preliminary Risk Assessment")
+# ---------- HEADER ----------
+st.markdown("""
+<h1 style='text-align: center;'>🫀 AI Clinical Decision Dashboard</h1>
+<p style='text-align: center;'>Smart Cardiac Triage & Test Recommendation System</p>
+<hr>
+""", unsafe_allow_html=True)
 
-st.markdown("---")
+# ---------- INPUT SECTION ----------
+st.subheader("📥 Enter Patient Details")
 
-# Input Section
-st.header("📥 Patient Clinical Data")
-
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    hr = st.number_input("Heart Rate (bpm)", min_value=40, max_value=180, value=75)
-    bp = st.number_input("Blood Pressure (mmHg)", min_value=80, max_value=200, value=120)
+    hr = st.slider("Heart Rate", 40, 180, 75)
 
 with col2:
-    symptom = st.selectbox(
-        "Primary Symptom",
+    bp = st.slider("Blood Pressure", 80, 200, 120)
+
+with col3:
+    symptom = st.selectbox("Symptom",
         ["None", "Chest Pain", "Fatigue", "Breathlessness"]
     )
-    stress = st.selectbox("Stress Level", ["Low", "Moderate", "High"])
 
-# Image upload
-st.header("🖼️ Echocardiogram Upload (Optional)")
-image = st.file_uploader("Upload ultrasound image")
+image = st.file_uploader("Upload Echocardiogram (optional)")
 
-st.markdown("---")
+# ---------- BUTTON ----------
+if st.button("🔍 Analyze"):
 
-# Analyze Button
-if st.button("🔍 Analyze Patient"):
-
-    # Decision Logic
+    # Logic
     if symptom == "Chest Pain" or hr > 110:
-        result = "Possible Cardiac Abnormality"
-        urgency = "🔴 Emergency"
-        tests = ["ECG", "Troponin Test", "Echocardiogram"]
-        advice = "Avoid exertion. Seek immediate medical care."
-        risk_value = 90
+        result = "⚠️ Cardiac Abnormality Detected"
+        risk = "HIGH"
+        color = "red"
+        tests = "ECG, Troponin, Echocardiogram"
+        advice = "Immediate medical attention required"
 
     elif symptom == "Breathlessness":
-        result = "Moderate Risk"
-        urgency = "🟡 Needs Evaluation"
-        tests = ["Chest X-ray", "Pulse Oximetry"]
-        advice = "Rest and monitor breathing. Visit doctor soon."
-        risk_value = 60
+        result = "⚠️ Moderate Risk Condition"
+        risk = "MEDIUM"
+        color = "orange"
+        tests = "Chest X-ray, Pulse Oximetry"
+        advice = "Consult doctor within 24 hrs"
 
     elif symptom == "Fatigue":
-        result = "Mild Risk"
-        urgency = "🟡 Moderate"
-        tests = ["Hemoglobin Test", "Thyroid Profile"]
-        advice = "Maintain hydration and proper nutrition."
-        risk_value = 50
+        result = "⚠️ Mild Risk"
+        risk = "LOW-MODERATE"
+        color = "gold"
+        tests = "Hb Test, Thyroid Profile"
+        advice = "Monitor condition and maintain rest"
 
     else:
-        result = "No Immediate Risk"
-        urgency = "🟢 Low"
-        tests = ["Routine Checkup"]
-        advice = "Maintain a healthy lifestyle."
-        risk_value = 30
-
-    # Output Section
-    st.header("🧠 Clinical Summary")
-
-    col3, col4 = st.columns(2)
-
-    with col3:
-        st.success(f"Finding: {result}")
-        st.warning(f"Urgency Level: {urgency}")
-
-    with col4:
-        st.subheader("📊 Risk Indicator")
-        st.progress(risk_value)
-
-    # Image analysis (prototype)
-    if image:
-        st.info("🧠 Image Analysis: No critical abnormality detected (prototype model)")
-
-    # Recommended Tests
-    st.subheader("🧪 Recommended Diagnostic Tests")
-    for t in tests:
-        st.write("•", t)
-
-    # Advice
-    st.subheader("🏠 Immediate Care Guidance")
-    st.info(advice)
-
-    # Patient Report
-    st.subheader("📄 Generated Patient Report")
-
-    st.markdown(f"""
-    **Heart Rate:** {hr} bpm  
-    **Blood Pressure:** {bp} mmHg  
-    **Symptom:** {symptom}  
-    **Stress Level:** {stress}  
-
-    **Assessment:** {result}  
-    **Urgency:** {urgency}  
-
-    **Recommended Tests:** {", ".join(tests)}  
-
-    **Advice:** {advice}  
-    """)
-
-    # Confidence
-    st.caption("Model Confidence: 82% (Prototype Simulation)")
+        result = "✅ Normal Condition"
+        risk = "LOW"
+        color = "green"
+        tests = "Routine Checkup"
+        advice = "Maintain healthy lifestyle"
 
     st.markdown("---")
-    st.warning("⚠️ This is a prototype clinical decision support system and not a medical diagnosis tool.")
+
+    # ---------- OUTPUT DASHBOARD ----------
+    st.subheader("📊 Analysis Dashboard")
+
+    c1, c2, c3 = st.columns(3)
+
+    c1.metric("Heart Rate", f"{hr} bpm")
+    c2.metric("Blood Pressure", f"{bp} mmHg")
+    c3.metric("Risk Level", risk)
+
+    st.markdown("---")
+
+    # Result box
+    st.markdown(f"""
+    <div style='padding:20px; border-radius:10px; background-color:#f5f5f5'>
+    <h3 style='color:{color}'>{result}</h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Image analysis
+    if image:
+        st.info("🧠 Image Insight: No critical abnormality detected (prototype)")
+
+    # ---------- TESTS ----------
+    st.subheader("🧪 Recommended Tests")
+    st.success(tests)
+
+    # ---------- ACTION ----------
+    st.subheader("🏥 Immediate Action")
+    st.warning(advice)
+
+    # ---------- REPORT ----------
+    st.subheader("📄 Summary Report")
+
+    st.write(f"""
+    - Heart Rate: {hr}
+    - Blood Pressure: {bp}
+    - Symptom: {symptom}
+    - Risk Level: {risk}
+    - Suggested Tests: {tests}
+    """)
+
+    st.caption("Confidence Score: 82%")osis tool.")
